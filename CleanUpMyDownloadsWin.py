@@ -248,16 +248,26 @@ def update_data(data: EntityData, db : Memory) -> None:
 
 def archive_data(entity: EntityData) -> None:
     src = Path(entity.path)
+    print(f"[ARCHIVED] {src}")
+    if DRY_RUN_MODE:
+        return 
+    
     dst = Path(f"{ARCHIVE_PATH}/{datetime.now()}").joinpath(src.name)
     src.rename(dst)
-    print(f"{src} has been move to archive")
 
 def delete_data(entity: EntityData) -> None:
+    
     src = Path(entity.path)
+    print(f"[DELETED] {src}")
+    if DRY_RUN_MODE:
+        return 
+    
     send2trash(src)
-    print(f"{src} has been move to trash")
 
 def browse_files(path : str, db_path): 
+    
+    entity_checked_count = 0
+    entity_cleaned_count = 0
     db = Memory(db_path) # Load CSV file
     entities = next(os.walk(path)) 
     dirs = entities[1]
@@ -270,6 +280,7 @@ def browse_files(path : str, db_path):
         update_data(entity, db)
         
         if entity.is_deprecated:
+            entity_cleaned_count +=1
             if entity.is_important:
                 archive_data(entity)
             else:
@@ -277,8 +288,15 @@ def browse_files(path : str, db_path):
             
         
         entities_metadata.append(entity)
+        entity_checked_count+=1
     
     db.update(entities_metadata)
+    print(
+    f"""
+    \r[END]
+    \rEntities checked : {entity_checked_count}
+    \rEntities cleaned : {entity_cleaned_count}
+    """)
 
 if __name__ == "__main__":
     
@@ -315,6 +333,9 @@ if __name__ == "__main__":
                         default=f"{appdata}\\cleanupmydownloads_history.csv",
                         help="path to the history file of the script"
                         )
+    parser.add_argument('--dry-run',
+                        action="store_true",
+                        help="flag to test the script without impact on the filesystem")
     args = parser.parse_args()
     
     
@@ -323,5 +344,20 @@ if __name__ == "__main__":
     TIME_LIMIT_IN_DAYS = args.limit
     ARCHIVE_PATH = args.archive
     HISTORY = args.history
+    DRY_RUN_MODE = args.dry_run
+    
+    print(
+        f"""
+        \r[OPTIONS]
+        \rTarget : {DOWNLOADS_PATH}
+        \rImportance threshold : {IMPORTANCE_THRESHOLD}
+        \rTime limit : {TIME_LIMIT_IN_DAYS}
+        \rArchive : {ARCHIVE_PATH}
+        \rHistory file : {HISTORY}
+        \rDry run? : {DRY_RUN_MODE}
+        """
+    )
+    
+    print("[ACTIONS]")
     browse_files(DOWNLOADS_PATH, HISTORY)
 
