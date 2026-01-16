@@ -43,7 +43,20 @@ Sinon
 
 #### On Windows
 
+1. Try dry run first to check if everything ok 
+```
+python ./CleanUpMyDownloadsWin.py --dry-run
+```
 
+2. Then if needed change the settings of the script using
+```
+python ./CleanUpMyDownloadsWin.py -h
+```
+
+3. Or execute it directly
+```
+python ./CleanUpMyDownloadsWin.py
+```
 
 #### On Linux
 
