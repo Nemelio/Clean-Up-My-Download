@@ -281,7 +281,7 @@ def browse_files(path : str, db_path):
         
         if entity.is_deprecated:
             entity_cleaned_count +=1
-            if entity.is_important:
+            if entity.is_important and SAFE_MODE:
                 archive_data(entity)
             else:
                 delete_data(entity)
@@ -336,6 +336,12 @@ if __name__ == "__main__":
     parser.add_argument('--dry-run',
                         action="store_true",
                         help="flag to test the script without impact on the filesystem")
+    parser.add_argument("--safe",
+                        default=1,
+                        choices=[0,1],
+                        type=int,
+                        help="toggle the importance level"
+                        )
     args = parser.parse_args()
     
     
@@ -345,7 +351,7 @@ if __name__ == "__main__":
     ARCHIVE_PATH = args.archive
     HISTORY = args.history
     DRY_RUN_MODE = args.dry_run
-    
+    SAFE_MODE = args.safe
     print(
         f"""
         \r[OPTIONS]
