@@ -3,12 +3,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import csv 
 from send2trash import send2trash
+import argparse
 
-
-DOWNLOADS_PATH="D:\\Téléchargements"
-IMPORTANCE_THRESHOLD = 3
-TIME_LIMIT_IN_DAYS = 30
-ARCHIVE_PATH = "D:\\Archives"
 
 
 
@@ -76,6 +72,12 @@ class Memory:
     """
     def __init__(self, path):
         self.path = path
+        
+        # Create the db if not exist 
+        if not Path(path).exists():
+            f = open(path, "w", encoding="utf-8")
+            f.close()
+        
         self.last_metadata = self.load_last_metadata()
 
     def load_last_metadata(self) -> dict[str, EntityData]:
@@ -255,7 +257,7 @@ def delete_data(entity: EntityData) -> None:
     send2trash(src)
     print(f"{src} has been move to trash")
 
-def browse_files(path : str, db_path : str = "./test.csv"): 
+def browse_files(path : str, db_path): 
     db = Memory(db_path) # Load CSV file
     entities = next(os.walk(path)) 
     dirs = entities[1]
@@ -278,4 +280,48 @@ def browse_files(path : str, db_path : str = "./test.csv"):
     
     db.update(entities_metadata)
 
-browse_files(DOWNLOADS_PATH)
+if __name__ == "__main__":
+    
+    appdata = os.environ["APPDATA"]
+    userprofile = os.environ["USERPROFILE"]
+    
+    parser = argparse.ArgumentParser(
+        prog="CleanUpMyDownload",
+        description="Clean Up My Download is a script that will automatically clean up your 'Downloads' directory"
+    )
+    
+    parser.add_argument('-t', '--target',
+                        default=f"{userprofile}\\Downloads",
+                        type=str,
+                        help="path to Downloads directory"
+                        )
+    parser.add_argument('-M', '--importance-lvl',
+                        default=3,
+                        type=int,
+                        help="threshold which determine how many times a file need to be used to be concidered importante"
+                        )
+    parser.add_argument('-L', '--limit',
+                        default=30,
+                        type=int,
+                        help="time limit in days after what the files are deleted."
+                        )
+    parser.add_argument('-a', '--archive',
+                        type=str,
+                        default=f"{userprofile}\\Archives",
+                        help="path to the archive directory"
+                        )
+    parser.add_argument('--history',
+                        type=str,
+                        default=f"{appdata}\\cleanupmydownloads_history.csv",
+                        help="path to the history file of the script"
+                        )
+    args = parser.parse_args()
+    
+    
+    DOWNLOADS_PATH= args.target
+    IMPORTANCE_THRESHOLD = args.importance_lvl
+    TIME_LIMIT_IN_DAYS = args.limit
+    ARCHIVE_PATH = args.archive
+    HISTORY = args.history
+    browse_files(DOWNLOADS_PATH, HISTORY)
+
