@@ -61,13 +61,14 @@ python ./CleanUpMyDownloadsWin.py
 #### On Linux
 
 
-### Limites
+### Limits
 
 
 *Constraints*
 - Require daily execution at each operating system startup
 - There is a risk of loss of important data
 - By default, only files that have been used more than three times are considered important and are archived rather than deleted
+- A simple action, such as clicking, can sometimes counts as an interaction with a file and updates its importance_level
 
 *Mitigations*
 - By default, files that are used at least three times are archived and moved out of the downloads directory

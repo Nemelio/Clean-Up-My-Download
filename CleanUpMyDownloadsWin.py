@@ -241,9 +241,10 @@ def update_data(data: EntityData, db : Memory) -> None:
     
     old_last_access = last_metadata.last_access
     new_last_access = data.last_access
-    
+    data.importance_level = last_metadata.importance_level
+
     if new_last_access > old_last_access: 
-        data.importance_level = last_metadata.importance_level + 1
+        data.importance_level += 1
         
 
 def archive_data(entity: EntityData) -> None:
